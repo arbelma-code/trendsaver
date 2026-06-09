@@ -2946,21 +2946,30 @@ function loadCurrency() {
   ratesEl.innerHTML = '<div class="currency-loading">⏳ טוען שערים...</div>';
   baseEl.textContent = 'טוען שערים...';
 
+  function applyRates(data) {
+    fxRates = data.rates;
+    fxRates.USD = 1;
+    baseEl.textContent = 'שערים חיים מול USD — עודכן: ' + (data.date || new Date().toISOString().slice(0,10));
+    runConverter();
+  }
+
   fetch('https://api.frankfurter.app/latest?base=USD&symbols=ILS,EUR,GBP,JPY,CHF,CAD,AUD')
-    .then(function(r) {
-      if (!r.ok) throw new Error('שגיאת שרת ' + r.status);
-      return r.json();
-    })
+    .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
     .then(function(data) {
-      if (!data || !data.rates) throw new Error('אין נתונים');
-      fxRates = data.rates;
-      fxRates.USD = 1;
-      baseEl.textContent = 'שערים חיים מול USD — עודכן: ' + (data.date || '');
-      runConverter();
+      if (!data || !data.rates) throw new Error();
+      applyRates(data);
     })
-    .catch(function(err) {
-      baseEl.textContent = 'שגיאה בטעינת שערים';
-      ratesEl.innerHTML = '<div class="currency-loading" style="color:var(--red)">' + (err && err.message ? err.message : 'שגיאה') + '</div>';
+    .catch(function() {
+      fetch('https://open.er-api.com/v6/latest/USD')
+        .then(function(r) { if (!r.ok) throw new Error(); return r.json(); })
+        .then(function(data) {
+          if (!data || !data.rates) throw new Error();
+          applyRates(data);
+        })
+        .catch(function() {
+          baseEl.textContent = 'שגיאה בטעינת שערים';
+          ratesEl.innerHTML = '<div class="currency-loading" style="color:var(--red)">בדוק חיבור אינטרנט ולחץ רענן</div>';
+        });
     });
 }
 
