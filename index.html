@@ -1482,6 +1482,10 @@ body.logged-in #pp-price,body.logged-in #pp-now,body.logged-in #pp-target{filter
 
 const SUPA     = "https://vkprqpycetzlmnluutwl.supabase.co";
 const SUPA_KEY = "sb_publishable_SLOSLbBeJQ5mkflF-SQtog_-jlvvRFe";
+// on localhost: go through proxy (avoids CORS). On production: call Supabase directly.
+var AUTH_BASE = (window.location.hostname === 'localhost')
+  ? '/auth'
+  : (SUPA + '/auth/v1');
 
 const P=[
 {id:"mba13",nm:"MacBook Air 13\"",sb:"M4 · 16GB · 256GB · 2025",ct:"mac",cl:"Mac",pr:3999,pl:"₪3,999",cp:-9,cs:"↓ 25% מהשקה",cc:"dn",tl:"עם M5 (₪4,199 → ₪3,999)",tg:3849,bg:"pb-dn",bt:"צפוי לרדת",ft:1,
@@ -2617,7 +2621,7 @@ function doSignup() {
   btn.textContent = 'רושם...';
   btn.disabled = true;
 
-  fetch(SUPA + '/auth/v1/signup', {
+  fetch(AUTH_BASE + '/signup', {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify({ email: email, password: pass, data: { username: username } })
@@ -2662,7 +2666,7 @@ function doLogin() {
   btn.textContent = 'מתחבר...';
   btn.disabled = true;
 
-  fetch(SUPA + '/auth/v1/token?grant_type=password', {
+  fetch(AUTH_BASE + '/token?grant_type=password', {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify({ email: email, password: pass })
@@ -2699,7 +2703,7 @@ function doSignOut() {
   if (saved) {
     try {
       var sess = JSON.parse(saved);
-      fetch(SUPA + '/auth/v1/logout', {
+      fetch(AUTH_BASE + '/logout', {
         method: 'POST',
         headers: { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + sess.token }
       }).catch(function() {});
@@ -2716,7 +2720,7 @@ function showForgot() {
   var email = document.getElementById('loginEmail').value.trim();
   var err   = document.getElementById('loginError');
   if (!email) { err.textContent = 'הכנס אימייל קודם'; return; }
-  fetch(SUPA + '/auth/v1/recover', {
+  fetch(AUTH_BASE + '/recover', {
     method: 'POST',
     headers: authHeaders(),
     body: JSON.stringify({ email: email })
