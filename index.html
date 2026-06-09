@@ -2946,10 +2946,7 @@ function loadCurrency() {
   ratesEl.innerHTML = '<div class="currency-loading">⏳ טוען שערים...</div>';
   baseEl.textContent = 'טוען שערים...';
 
-  var fxUrl = window.location.hostname === 'localhost'
-    ? '/currency'
-    : 'https://api.frankfurter.app/latest?base=USD&symbols=ILS,EUR,GBP,JPY,CHF,CAD,AUD';
-  fetch(fxUrl)
+  fetch('https://api.frankfurter.app/latest?base=USD&symbols=ILS,EUR,GBP,JPY,CHF,CAD,AUD')
     .then(function(r) {
       if (!r.ok) throw new Error('שגיאת שרת ' + r.status);
       return r.json();
